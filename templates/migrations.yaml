@@ -1,0 +1,21 @@
+{{- if .Values.migrations.run }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "konga.fullname" . }}-migrations
+spec:
+  template:
+    metadata:
+      name: {{ template "konga.fullname" . }}-migrations
+    spec:
+      containers:
+        - name: {{ template "konga.fullname" . }}-migrations
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+            {{- toYaml .Values.secrets | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "konga.fullname" . }}-config
+          command: [ "/bin/sh", "-c", "npm start" ]
+      restartPolicy: Never
+{{- end }}
